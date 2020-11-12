@@ -1,13 +1,20 @@
 #include "lee.h"
 #include <queue>
 #include <algorithm>
+#include <random>
+#include <iostream>
 
 using namespace std;
 
+Lee::Lee()
+{
+	_width = 0; 
+	_length = 0;
+}
+
 Lee::Lee(int width, int length) : _width(width), _length(length)
 {
-	for (int i = 0; i < width; ++i)
-		map.push_back(vector<int>(length));
+	MakeMap();
 }
 
 vector<Coord> Lee::GetNeighbors(Coord cell) const
@@ -63,6 +70,9 @@ int Lee::Forward(Coord start, Coord dest)
 vector<Coord> Lee::Backward(Coord start, Coord dest) const
 {
 	int distance = map[dest.first][dest.second];
+	// ≈сли пути до конца нет
+	if (!distance)
+		return vector<Coord>();
 	vector<Coord> res(distance + 1);
 
 	Coord cur = dest;
@@ -74,7 +84,7 @@ vector<Coord> Lee::Backward(Coord start, Coord dest) const
 			break;
 		distance--;
 	}
-	if (distance == 1)
+	if (distance <= 1)
 		res[0] = start;
 	return res;
 }
@@ -98,9 +108,7 @@ Coord Lee::NextNeighbor(Coord cur) const
 
 pair<vector<Coord>, int> Lee::Findpath(Coord start, Coord dest)
 {
-	CleanUp();
 	int op = Forward(start, dest);
-	Print();
 	vector<Coord> path = Backward(start, dest);
 	CleanUp();
 
@@ -108,11 +116,84 @@ pair<vector<Coord>, int> Lee::Findpath(Coord start, Coord dest)
 	return { path, op + path.size() };
 }
 
-void Lee::CleanUp()
+void Lee::CleanUp(bool full)
 {
 	// удалим метки рассто€ний со всех €чеек кроме преп€тствий
+	// full - удал€ем и преп€тстви€
 	for (int i = 0; i < _width; ++i)
 		for (int j = 0; j < _length; ++j)
-			if (map[i][j] != -1)
+			if (map[i][j] == -1 || full)
 				map[i][j] = 0;
+}
+
+void Lee::GenerateObstacles()
+{
+	// √енераци€ преград (отмечаютс€ -1 на карте)
+	random_device rd;
+	std::mt19937 rand(rd());
+
+	for (int i = 0; i < _width; ++i)
+		for (int j = 0; j < _length; ++j)
+		{
+			float num = (rand() % 100) * 1. / 100;
+			if (num > 0.8)
+				map[i][j] = -1;
+		}
+}
+
+pair<Coord, Coord> Lee::GenerateCoords() const
+{
+	random_device rd;
+	std::mt19937 rand(rd());
+	int first = 0;
+	int second = 0;
+
+	do
+	{
+		first = rand() % _width;
+		second = rand() % _length;
+	} while (map[first][second]);
+
+	Coord start = { first, second };
+
+	do
+	{
+		first = rand() % _width;
+		second = rand() % _length;
+	} while (map[first][second]);
+
+	Coord dest = { first, second };
+
+	return { start, dest };
+}
+
+void Lee::MakeMap()
+{
+	vector<vector<int>> newMap;
+	for (int i = 0; i < _width; ++i)
+		newMap.push_back(vector<int>(_length));
+	map = move(newMap);
+}
+
+vector<int> Lee::GenerateTask(int width, int length, int num)
+{
+	_width = width;
+	_length = length;
+	MakeMap();
+	
+	vector<int> results;
+	for (int i = 0; i < num; ++i)
+	{
+		cout << "Test number " << i + 1 << endl;
+		GenerateObstacles();
+		//Print();
+		auto coords = GenerateCoords();
+		cout << "Start: (" << coords.first.first << ", " << coords.first.second << ") Finish: (" << 
+			coords.second.first << ", " << coords.second.second << ")"<< endl;
+		pair<vector<Coord>, int> res = Findpath(coords.first, coords.second);
+		cout << "Operations: " << res.second << "\n\n";
+		results.push_back(res.second);
+		CleanUp(true);	
+	}
+	return results;
 }

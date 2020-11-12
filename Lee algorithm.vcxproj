@@ -147,7 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Lee algorithm.cpp" />
+    <ClCompile Include="Lee test.cpp" />
     <ClCompile Include="lee.cpp" />
   </ItemGroup>
   <ItemGroup>
