@@ -27,4 +27,8 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="results.txt" />
+    <Text Include="frequency.txt" />
+  </ItemGroup>
 </Project>

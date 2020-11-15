@@ -42,7 +42,7 @@ int Lee::Forward(Coord start, Coord dest)
 	queue<Coord> curCoords;
 	curCoords.push(start);
 
-	// Расстояние от стратовой точки
+	// Расстояние от стартовой точки
 	int distance = 0;
 	map[start.first][start.second] = -1;
 	while (!map[dest.first][dest.second] && !curCoords.empty())
@@ -72,7 +72,7 @@ vector<Coord> Lee::Backward(Coord start, Coord dest) const
 	int distance = map[dest.first][dest.second];
 	// Если пути до конца нет
 	if (!distance)
-		return vector<Coord>();
+		return { start, dest };
 	vector<Coord> res(distance + 1);
 
 	Coord cur = dest;
@@ -108,12 +108,14 @@ Coord Lee::NextNeighbor(Coord cur) const
 
 pair<vector<Coord>, int> Lee::Findpath(Coord start, Coord dest)
 {
+	if (start == dest)
+		return { { start }, 1 };
 	int op = Forward(start, dest);
 	vector<Coord> path = Backward(start, dest);
 	CleanUp();
 
 	// Возвращает сам путь и трудоемкость
-	return { path, op + path.size() };
+	return { path, op + path.size() - 1 };
 }
 
 void Lee::CleanUp(bool full)
@@ -126,17 +128,16 @@ void Lee::CleanUp(bool full)
 				map[i][j] = 0;
 }
 
-void Lee::GenerateObstacles()
+void Lee::GenerateObstacles(double ratio)
 {
 	// Генерация преград (отмечаются -1 на карте)
 	random_device rd;
 	std::mt19937 rand(rd());
-
 	for (int i = 0; i < _width; ++i)
 		for (int j = 0; j < _length; ++j)
 		{
-			float num = (rand() % 100) * 1. / 100;
-			if (num > 0.8)
+			double num = (rand() % 100) * 1. / 100;
+			if (num > ratio)
 				map[i][j] = -1;
 		}
 }
@@ -175,25 +176,40 @@ void Lee::MakeMap()
 	map = move(newMap);
 }
 
-vector<int> Lee::GenerateTask(int width, int length, int num)
+vector<int> Lee::GenerateTask(int width, int length, int num, bool onlyExisting)
 {
+	random_device rd;
+	std::mt19937 rand(rd());
+
 	_width = width;
 	_length = length;
 	MakeMap();
 	
 	vector<int> results;
+	//double rto = 0.6 + rand() % 21 * 1.0 / 100;
+	double rto = 0.7;
+	GenerateObstacles(rto);
+	Print();
 	for (int i = 0; i < num; ++i)
 	{
 		cout << "Test number " << i + 1 << endl;
-		GenerateObstacles();
-		//Print();
+		//cout << "Ratio: " << rto << endl;
+		//pair<Coord, Coord> coords = { { 0, 0 }, { _width - 1, _length - 1 } };
 		auto coords = GenerateCoords();
-		cout << "Start: (" << coords.first.first << ", " << coords.first.second << ") Finish: (" << 
-			coords.second.first << ", " << coords.second.second << ")"<< endl;
+		cout << "Start: (" << coords.first.first << ", " << coords.first.second << ") Finish: (" <<
+			coords.second.first << ", " << coords.second.second << ")" << endl;
+		map[coords.first.first][coords.first.second] = 0;
+		map[coords.second.first][coords.second.second] = 0;
 		pair<vector<Coord>, int> res = Findpath(coords.first, coords.second);
-		cout << "Operations: " << res.second << "\n\n";
+		cout << res.second << "\n\n";
+		CleanUp(true);
+		if (onlyExisting && (res.first[0] != coords.first))
+		{
+			--i;
+			continue;
+		}
+		//rto = 0.6 + rand() % 21 * 1.0 / 100;
 		results.push_back(res.second);
-		CleanUp(true);	
 	}
 	return results;
 }
