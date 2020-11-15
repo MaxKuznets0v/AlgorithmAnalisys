@@ -21,7 +21,7 @@ public:
 		}
 	}
 	std::pair<std::vector<Coord>, int> Findpath(Coord start, Coord dest);
-	std::vector<int> GenerateTask(int width, int length, int num);
+	std::vector<int> GenerateTask(int width, int length, int num, bool onlyExists);
 private:
 	// Длина и ширина дискретной сетки
 	int _width;
@@ -35,6 +35,6 @@ private:
 	std::vector<Coord> GetNeighbors(Coord) const;
 	Coord NextNeighbor(Coord) const;
 	void CleanUp(bool full = false);
-	void GenerateObstacles();
+	void GenerateObstacles(double ratio);
 	std::pair<Coord, Coord> GenerateCoords() const;
 };
