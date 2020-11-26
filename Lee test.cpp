@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int main()
+void CountFreq(int interval)
 {
 	ifstream results("results.txt");
 	ofstream frequency("frequency.txt", ios_base::trunc);
@@ -14,8 +14,6 @@ int main()
 	while (results >> num)
 		res.push_back(num);
 
-
-	int interval = 50;
 	double min = 0, max = 1;
 	double step = 1.0 * (max - min) / interval;
 	cout << step << endl;
@@ -35,17 +33,30 @@ int main()
 	frequency << "---\n";
 	for (int i = 0; i < count.size(); ++i)
 		frequency << i * step << '\n';
-
-	/*Lee test;
-	int width = 80;
-	int length = 90;
-	int testNum = 10000;
-	ofstream results("results.txt", ios_base::trunc);
-
-	vector<int> res = test.GenerateTask(width, length, testNum, true);
-
-	for (auto& elem : res)
-		results << elem << "\n";*/
 	results.close();
+	frequency.close();
+}
+
+int main()
+{
+	/*CountFreq(40);
+	return 0;*/
+	Lee test;
+	int width = 10;
+	int length = 10;
+	int step = 2;
+	int testNum = 3000;
+	ofstream results("results.txt", ios_base::app);
+
+	vector<int> res;
+	for (int i = 21; i < 30; ++i)
+	{
+		res = test.GenerateTask(width + i * step, length + i * step, testNum, true);
+		results << "Size: " << width + i * step << "x" << length + i * step << endl;
+		for (auto& elem : res)
+			results << elem << "\n";
+		results << "------\n";
+	}
+
 	return 0;
 }
