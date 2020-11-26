@@ -2,6 +2,7 @@
 #include <utility>
 #include <vector>
 #include <iostream>
+#include <iomanip>
 
 // Первое значение - строчка, второе - столбец
 typedef std::pair<int, int> Coord;
@@ -16,7 +17,20 @@ public:
 		for (int i = 0; i < _width; ++i)
 		{
 			for (int j = 0; j < _length; ++j)
-				std::cout << map[i][j] << " ";
+			{
+				switch (map[i][j])
+				{
+				case 0:
+					std::cout << std::setw(2) << " " << " ";
+					break;
+				case -1:
+					std::cout << std::setw(2) << "#" << " ";
+					break;
+				default:
+					std::cout << std::setw(2) << map[i][j] << " ";
+					break;
+				}
+			}
 			std::cout << std::endl;
 		}
 	}
@@ -34,7 +48,11 @@ private:
 	std::vector<Coord> Backward(Coord start, Coord dest) const;
 	std::vector<Coord> GetNeighbors(Coord) const;
 	Coord NextNeighbor(Coord) const;
+	bool DeadEnd(int x, int y) const;
 	void CleanUp(bool full = false);
 	void GenerateObstacles(double ratio);
+	void GenerateMaze(Coord left_upper, Coord right_down);
+	void GenerateMazeNonRec();
 	std::pair<Coord, Coord> GenerateCoords() const;
+	
 };
